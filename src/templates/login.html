@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <style>
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+        }
+        to {
+          opacity: 1;
+        }
+      }
+      @keyframes scaleIn {
+        from {
+          transform: scale(0.8);
+          opacity: 0;
+        }
+        to {
+          transform: scale(1);
+          opacity: 1;
+        }
+      }
+      .fade-in {
+        animation: fadeIn 0.1s ease forwards;
+      }
+      .scale-in {
+        animation: scaleIn 0.1s ease forwards;
+      }
+    </style>
+    <script>
+      function togglePassword() {
+        var passwordInput = document.getElementById("password");
+        var eyeIcon = document.getElementById("eye-icon");
+
+        if (passwordInput.type === "password") {
+          passwordInput.type = "text";
+          eyeIcon.src = eyeIcon.getAttribute("data-src-slash");
+        } else {
+          passwordInput.type = "password";
+          eyeIcon.src = eyeIcon.getAttribute("data-src-eye");
+        }
+      }
+
+      function closeAlert() {
+        const errorModal = document.getElementById("error-modal");
+        if (errorModal) {
+          errorModal.classList.add("opacity-0");
+          setTimeout(() => {
+            errorModal.classList.add("hidden");
+          }, 300);
+        }
+      }
+
+      // Show modal with animation when page loads
+      window.addEventListener("DOMContentLoaded", (event) => {
+        const errorModal = document.getElementById("error-modal");
+        const modalContent = document.getElementById("modal-content");
+
+        if (errorModal) {
+          errorModal.classList.add("fade-in");
+        }
+
+        if (modalContent) {
+          modalContent.classList.add("scale-in");
+        }
+      });
+    </script>
+  </head>
+  <body class="h-screen flex items-center justify-center bg-gray-100">
+    <div
+      class="w-full h-full flex flex-col md:flex-row bg-white shadow-lg overflow-hidden"
+    >
+      <!-- Error Alert Popup -->
+      {% if error %}
+      <div
+        id="error-modal"
+        class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 transition-opacity duration-300"
+      >
+        <div
+          id="modal-content"
+          class="bg-white p-5 rounded-[20px] shadow-lg w-[90%] max-w-md relative"
+        >
+          <button
+            onclick="closeAlert()"
+            class="absolute top-2 right-2 text-gray-600 hover:text-gray-900 text-2xl"
+          >
+            &times;
+          </button>
+
+          <div class="text-center mb-4">
+            <i
+              class="fa-solid fa-triangle-exclamation text-red-500 text-4xl mb-2"
+            ></i>
+            <h3 class="text-xl font-semibold">Login Failed</h3>
+            <p class="text-gray-600">{{ error }}</p>
+          </div>
+
+          <div class="flex justify-center">
+            <button
+              onclick="closeAlert()"
+              class="bg-blue-500 text-white px-4 py-2 rounded-full hover:bg-blue-600 transition"
+            >
+              Try Again
+            </button>
+          </div>
+        </div>
+      </div>
+      {% endif %}
+
+      <!-- Sign In Form -->
+      <div
+        class="w-full md:w-1/2 flex flex-col justify-center items-center p-12 pt-32 md:pt-12"
+        id="sign-in-container"
+      >
+        <h1 class="text-3xl font-bold mb-2">Welcome Back!</h1>
+        <span class="text-gray-500">Scrape easily and smartly.</span>
+        <form
+          method="POST"
+          action=""
+          class="space-y-6 w-3/4 flex flex-col items-center mx-auto pt-8 md:pt-0"
+        >
+          <div class="relative w-full max-w-md mx-auto ">
+            <input
+              type="text"
+              placeholder="Username"
+              name="username"
+              id="signin-username"
+              required
+              class="w-full px-4 py-3 pl-10 border rounded-full focus:ring-2 focus:ring-blue-500 focus:outline-none bg-blue-100"
+            />
+            <img
+              src="{{ url_for('static', filename='images/user.svg') }}"
+              class="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 opacity-70"
+              alt="User Icon"
+            />
+          </div>
+          <div class="relative w-full max-w-md mx-auto">
+            <input
+              id="password"
+              type="password"
+              name="password"
+              placeholder="Password"
+              required
+              class="w-full px-4 py-3 pl-10 pr-12 border rounded-full focus:ring-2 focus:ring-blue-500 focus:outline-none bg-blue-100"
+            />
+            <img
+              src="{{ url_for('static', filename='images/lock.svg') }}"
+              class="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 opacity-70"
+              alt="Lock Icon"
+            />
+            <img
+              id="eye-icon"
+              src="{{ url_for('static', filename='images/eye-solid.svg') }}"
+              data-src-eye="{{ url_for('static', filename='images/eye-solid.svg') }}"
+              data-src-slash="{{ url_for('static', filename='images/eye-slash-solid.svg') }}"
+              class="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 md:w-5 md:h-5 opacity-100 cursor-pointer"
+              alt="Eye Icon"
+              onclick="togglePassword()"
+            />
+          </div>
+          <button
+            class="bg-white bg-opacity-0 text-blue-500 px-5 py-2 rounded-full font-semibold hover:bg-blue-500 hover:text-white transition border-2 border-blue-500 md:px-8 md:py-3 lg:px-8 lg:py-3"
+          >
+            Sign In
+          </button>
+        </form>
+      </div>
+      <!-- Right Panel -->
+      <div
+        class="w-full md:w-1/2 flex flex-col items-center justify-center bg-blue-500 text-white py-16 px-6 md:p-12 relative rounded-tl-full rounded-tr-full md:rounded-tr-none md:rounded-bl-full overflow-hidden md:pt-4">
+        <div
+          class="absolute inset-0 bg-cover bg-center blur-lg opacity-50 bg-[url('/static/images/blur.jpg')] z-0"
+        ></div>
+        <img
+          src="{{ url_for('static', filename='images/logo.svg') }}"
+          alt="Logo"
+          class="w-28 md:w-40 mb-2 md:mb-4 relative z-10 hidden md:block"
+        />
+        <img
+          src="{{ url_for('static', filename='images/Chat bot-rafiki.svg') }}"
+          alt="Illustration"
+          class="w-40 md:w-64 mb-4 md:mb-6 relative z-10 hidden md:block"
+        />
+        <h1 class="text-lg md:text-xl font-bold mb-2 relative z-10">
+          Join GPTSniffer Now!
+        </h1>
+        <p class="text-center text-sm md:text-base mb-4 md:mb-6 relative z-10">
+          Create your account today and start scraping smarter!
+        </p>
+        <a href="/register" class="relative z-10">
+          <button
+            class="bg-white bg-opacity-0 text-white px-5 md:px-8 py-2 md:py-3 rounded-full font-semibold hover:bg-white hover:text-blue-500 transition border-2 border-white"
+          >
+            Sign Up
+          </button>
+        </a>
+      </div>
+    </div>
+  </body>
+</html>

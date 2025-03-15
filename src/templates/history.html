@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>GPTSniffer</title>
+    <link rel="icon" type="image/svg+xml" href="assets/Group16.svg" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
+      integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+  </head>
+  <body
+    class="bg-gray-100 flex justify-center items-center h-screen px-4 md:px-10 overflow-hidden relative"
+  >
+    <!-- Efek Blur Biru sebagai Background -->
+    <div class="absolute inset-0 -z-10">
+      <div
+        class="absolute top-[92px] left-0 w-[739px] h-[745px] bg-blue-500 rounded-full blur-[97.3px] opacity-50"
+      ></div>
+      <div
+        class="absolute top-[113px] right-0 w-[660px] h-[592px] bg-blue-500 rounded-full blur-[97.3px] opacity-50"
+      ></div>
+    </div>
+    <div class="w-full max-w-[80rem] h-full flex flex-col rounded-3xl p-1">
+      <div class="flex justify-between items-center mb-1">
+        <div class="grow flex justify-between items-center px-3">
+          <a href="/">
+            <img
+              src="{{ url_for('static', filename='images/GPTSniffer.svg') }}"
+            />
+          </a>
+          <button
+  id="showFormBtn"
+  class="bg-blue-500 text-white px-2 py-1 md:px-4 md:py-2 text-[9px] md:text-base col-end-7 rounded-3xl hover:bg-blue-600 flex items-center justify-center"
+>
+  <span class="md:hidden text-sm">+</span>
+  <!-- Tampilkan hanya di mobile -->
+  <span class="hidden md:block">+ New Scrapper</span>
+  <!-- Tampilkan hanya di desktop -->
+</button>
+        </div>
+
+        <div
+          class="w-full md:w-1/4 bg-white px-2 py-1 md:px-4 md:py-2 rounded-3xl flex justify-between items-center shadow-lg"
+        >
+          <div class="flex items-center gap-1 md:gap-2">
+            <img
+              src="{{ url_for('static', filename='images/Group.svg') }}"
+              class="aspect-square w-[1.5rem] md:w-[2rem]"
+            />
+            <span class="text-gray-700 font-semibold text-sm md:text-base">
+              {{user['username']}}
+            </span>
+          </div>
+          <a href="/logout">
+            <button
+              class="w-[1.5rem] h-[1.5rem] md:w-[2rem] md:h-[2rem] flex items-center justify-center"
+            >
+              <i
+                class="fa-solid fa-arrow-right-from-bracket text-blue-500 text-lg md:text-xl"
+              ></i>
+            </button>
+          </a>
+        </div>
+      </div>
+
+      <div class="flex gap-4 h-full">
+        <!-- History Content Section -->
+        <div class="w-full p-4 h-[84vh] flex flex-col">
+          <!-- History Table with Fixed Height Scrollable Body -->
+          <div class="overflow-x-auto flex-grow">
+            <div class="overflow-y-auto">
+              <table class="min-w-full bg-white bg-opacity-50 rounded-lg overflow-hidden text-[10px] md:text-sm">
+                <thead class="bg-blue-500 text-white sticky top-0 text-center text-[10px] md:text-sm">
+                  <tr>
+                    <th class="py-1 px-2 min-w-[40px]">No</th>
+                    <th class="py-1 px-2 min-w-[50px] md:min-w-[100px]">Title</th>
+                    <th class="py-1 px-2 min-w-[40px] md:min-w-[150px]">Link</th>
+                    <th class="py-1 px-2 min-w-[100px]">Upload Date</th>
+                    <th class="py-1 px-2 min-w-[60px] md:min-w-[80px]">Action</th>
+                  </tr>
+                </thead>
+                <tbody id="tableBody" class="text-center">
+                  {% for item in history_items %}
+                  <tr class="border-b hover:bg-blue-50 data-row">
+                    <td class="py-1 px-2 row-index">{{ loop.index }}</td>
+                    <td class="py-1 px-2 searchable text-left whitespace-nowrap max-w-[80px] md:max-w-none">{{ item.title }}</td>
+                    <td class="py-1 px-2 searchable">
+                      <div class="flex items-center justify-center">
+                        <span class="hidden md:inline truncate max-w-[200px]">{{ item.link }}</span>
+                        <button class="ml-1 text-blue-500 hover:text-blue-700 text-[10px] md:text-base"
+                          onclick="copyToClipboard('{{ item.link }}')">
+                          <i class="fa-regular fa-copy"></i>
+                        </button>
+                      </div>
+                    </td>
+                    <td class="py-1 px-2 searchable whitespace-nowrap">
+                      {{ item.created_at.strftime('%d %b %Y, %H:%M') }}
+                    </td>
+                    <td class="py-1 px-2">
+                      <div class="flex justify-center space-x-1">
+                        <a href="/conversations/{{ item.conversation_id }}" class="text-blue-500 hover:text-blue-700 text-[10px] md:text-base">
+                          <i class="fa-solid fa-comments"></i>
+                        </a>
+                        <button class="text-red-500 hover:text-red-700 text-[10px] md:text-base"
+                          onclick="confirmDelete('{{ item.conversation_id }}')">
+                          <i class="fa-solid fa-trash"></i>
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+          
+          
+          <!-- Pagination Controls -->
+          <div class="mt-auto flex flex-col items-center pt-4">
+            <div class="text-sm text-gray-900 self-start">
+              Showing <span id="startIndex">1</span> to
+              <span id="endIndex">10</span> of
+              <span id="totalItems">{{ history_items|length }}</span> entries
+            </div>
+            <div class="flex justify-center w-full mt-2">
+              <button
+                id="prevPage"
+                class="w-8 h-8 flex items-center justify-center rounded-full bg-blue-500 text-white disabled:bg-blue-300 hover:bg-blue-600 mr-1"
+              >
+                <i class="fa-solid fa-chevron-left"></i>
+              </button>
+              <div id="pageNumbers" class="flex"></div>
+              <button
+                id="nextPage"
+                class="w-8 h-8 flex items-center justify-center rounded-full bg-blue-500 text-white disabled:bg-blue-300 hover:bg-blue-600 ml-1"
+              >
+                <i class="fa-solid fa-chevron-right"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Form Modal -->
+    <form action="/insert" method="post">
+      <div
+        id="formModal"
+        class="hidden fixed inset-0 flex items-center justify-center bg-black bg-opacity-50"
+      >
+        <div
+          class="bg-white p-5 rounded-[20px] shadow-lg w-[90%] max-w-xl border border-blue-300 relative"
+        >
+          <!-- Close Button -->
+          <button
+            id="closeFormBtn"
+            class="absolute top-2 right-2 text-gray-600 hover:text-gray-900 text-2xl"
+            type="button"
+          >
+            &times;
+          </button>
+
+          <label class="block mb-2 font-semibold" for="title"
+            >Enter Title</label
+          >
+          <input
+            type="text"
+            class="w-full p-2 mb-4 border rounded-full bg-blue-100 focus:outline-none focus:ring focus:ring-blue-400"
+            name="title"
+            id="title"
+            required
+          />
+
+          <label class="block mb-2 font-semibold" for="link">Enter Link</label>
+          <input
+            type="text"
+            class="w-full p-2 mb-4 border rounded-full bg-blue-100 focus:outline-none focus:ring focus:ring-blue-400"
+            name="link"
+            id="link"
+            required
+          />
+
+          <div class="flex justify-end">
+            <button
+              class="bg-blue-500 text-white px-4 py-2 rounded-full hover:bg-blue-600"
+              type="submit"
+            >
+              + Add
+            </button>
+          </div>
+        </div>
+      </div>
+    </form>
+
+    <!-- Delete Confirmation Modal -->
+    <div
+      id="deleteModal"
+      class="hidden fixed inset-0 flex items-center justify-center bg-black bg-opacity-50"
+    >
+      <div
+        class="bg-white p-5 rounded-[20px] shadow-lg w-[90%] max-w-md border border-red-300 relative"
+      >
+        <button
+          id="closeDeleteBtn"
+          class="absolute top-2 right-2 text-gray-600 hover:text-gray-900 text-2xl"
+        >
+          &times;
+        </button>
+
+        <div class="text-center mb-4">
+          <i
+            class="fa-solid fa-triangle-exclamation text-red-500 text-4xl mb-2"
+          ></i>
+          <h3 class="text-xl font-semibold">Confirm Deletion</h3>
+          <p class="text-gray-600">
+            Are you sure you want to delete this scraper? This action cannot be
+            undone.
+          </p>
+        </div>
+
+        <div class="flex justify-center space-x-4">
+          <button
+            id="cancelDeleteBtn"
+            class="bg-gray-300 text-gray-700 px-4 py-2 rounded-full hover:bg-gray-400"
+          >
+            Cancel
+          </button>
+          <form id="deleteForm" action="/delete_scraper" method="post">
+            <input
+              type="hidden"
+              id="deleteId"
+              name="conversation_id"
+              value=""
+            />
+            <button
+              class="bg-red-500 text-white px-4 py-2 rounded-full hover:bg-red-600"
+              type="submit"
+            >
+              Delete
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </body>
+  <script>
+    // Show/Hide New Scraper Modal
+    document
+      .getElementById("showFormBtn")
+      .addEventListener("click", function () {
+        document.getElementById("formModal").classList.remove("hidden");
+      });
+
+    document
+      .getElementById("closeFormBtn")
+      .addEventListener("click", function () {
+        document.getElementById("formModal").classList.add("hidden");
+      });
+
+    // Delete Confirmation Modal
+    function confirmDelete(id) {
+      document.getElementById("deleteId").value = id;
+      document.getElementById("deleteModal").classList.remove("hidden");
+    }
+
+    document
+      .getElementById("closeDeleteBtn")
+      .addEventListener("click", function () {
+        document.getElementById("deleteModal").classList.add("hidden");
+      });
+
+    document
+      .getElementById("cancelDeleteBtn")
+      .addEventListener("click", function () {
+        document.getElementById("deleteModal").classList.add("hidden");
+      });
+
+    // Copy link to clipboard
+    function copyToClipboard(text) {
+      navigator.clipboard.writeText(text).then(
+        function () {
+          alert("Link copied to clipboard!");
+        },
+        function () {
+          alert("Failed to copy link.");
+        }
+      );
+    }
+
+    // Pagination Logic
+    document.addEventListener("DOMContentLoaded", function () {
+      const tableBody = document.getElementById("tableBody");
+      const rows = Array.from(tableBody.querySelectorAll("tr.data-row"));
+      const pageNumbers = document.getElementById("pageNumbers");
+      const prevPageBtn = document.getElementById("prevPage");
+      const nextPageBtn = document.getElementById("nextPage");
+      const startIndexElem = document.getElementById("startIndex");
+      const endIndexElem = document.getElementById("endIndex");
+      const totalItemsElem = document.getElementById("totalItems");
+
+      let currentPage = 1;
+      const rowsPerPage = 10; // Fixed to 10 rows per page
+      let filteredRows = [...rows];
+
+      // Initialize
+      updateTable();
+
+      prevPageBtn.addEventListener("click", function () {
+        if (currentPage > 1) {
+          currentPage--;
+          updateTable();
+        }
+      });
+
+      nextPageBtn.addEventListener("click", function () {
+        const totalPages = Math.ceil(filteredRows.length / rowsPerPage);
+        if (currentPage < totalPages) {
+          currentPage++;
+          updateTable();
+        }
+      });
+
+      // Table update function
+      function updateTable() {
+        const totalPages = Math.ceil(filteredRows.length / rowsPerPage);
+
+        // Hide all rows
+        rows.forEach((row) => row.classList.add("hidden"));
+
+        // Calculate which rows to show
+        const startIndex = (currentPage - 1) * rowsPerPage;
+        const endIndex = Math.min(
+          startIndex + rowsPerPage,
+          filteredRows.length
+        );
+
+        // Show filtered rows for current page
+        for (let i = startIndex; i < endIndex; i++) {
+          filteredRows[i].classList.remove("hidden");
+          // Update the index column
+          filteredRows[i].querySelector(".row-index").textContent = i + 1;
+        }
+
+        // Update pagination info
+        startIndexElem.textContent =
+          filteredRows.length > 0 ? startIndex + 1 : 0;
+        endIndexElem.textContent = endIndex;
+        totalItemsElem.textContent = filteredRows.length;
+
+        // Update pagination buttons state
+        prevPageBtn.disabled = currentPage === 1;
+        nextPageBtn.disabled = currentPage === totalPages || totalPages === 0;
+
+        // Generate page number buttons
+        pageNumbers.innerHTML = "";
+
+        // Determine range of page numbers to show (show maximum 5 pages)
+        let startPage = Math.max(1, currentPage - 2);
+        let endPage = Math.min(totalPages, startPage + 4);
+
+        // Adjust if we're near the end
+        if (endPage - startPage < 4 && startPage > 1) {
+          startPage = Math.max(1, endPage - 4);
+        }
+
+        // Add first page button if not included in range
+        if (startPage > 1) {
+          const firstPageBtn = document.createElement("button");
+          firstPageBtn.className =
+            "px-3 py-1 bg-white text-blue-500 hover:bg-blue-100";
+          firstPageBtn.textContent = "1";
+          firstPageBtn.addEventListener("click", () => {
+            currentPage = 1;
+            updateTable();
+          });
+          pageNumbers.appendChild(firstPageBtn);
+
+          // Add ellipsis if needed
+          if (startPage > 2) {
+            const ellipsis = document.createElement("span");
+            ellipsis.className = "px-3 py-1 bg-white text-blue-500";
+            ellipsis.textContent = "...";
+            pageNumbers.appendChild(ellipsis);
+          }
+        }
+
+        // Add page number buttons
+        for (let i = startPage; i <= endPage; i++) {
+          const pageBtn = document.createElement("button");
+          pageBtn.className =
+            i === currentPage
+              ? "w-8 h-8 flex items-center justify-center rounded-full bg-blue-600 text-white mx-1"
+              : "w-8 h-8 flex items-center justify-center rounded-full bg-white bg-opacity-50 text-blue-500 hover:bg-white mx-1";
+          pageBtn.textContent = i;
+          pageBtn.addEventListener("click", () => {
+            currentPage = i;
+            updateTable();
+          });
+          pageNumbers.appendChild(pageBtn);
+        }
+
+        // Add last page button if not included in range
+        if (endPage < totalPages) {
+          // Add ellipsis if needed
+          if (endPage < totalPages - 1) {
+            const ellipsis = document.createElement("span");
+            ellipsis.className = "px-3 py-1 bg-white text-blue-500";
+            ellipsis.textContent = "...";
+            pageNumbers.appendChild(ellipsis);
+          }
+
+          const lastPageBtn = document.createElement("button");
+          lastPageBtn.className =
+            "px-3 py-1 bg-white text-blue-500 hover:bg-blue-100";
+          lastPageBtn.textContent = totalPages;
+          lastPageBtn.addEventListener("click", () => {
+            currentPage = totalPages;
+            updateTable();
+          });
+          pageNumbers.appendChild(lastPageBtn);
+        }
+      }
+    });
+
+    // Clean up whitespace in paragraphs
+    document.querySelectorAll("p").forEach((el) => {
+      el.textContent = el.textContent.trim().replace(/\s+/g, " ");
+    });
+  </script>
+</html>

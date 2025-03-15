@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>GPTSniffer</title>
+    <link rel="icon" type="image/svg+xml" href="assets/Group16.svg" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
+      integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+  </head>
+  <body
+    class="bg-gray-100 flex justify-center items-center h-screen px-4 md:px-10 overflow-hidden relative"
+  >
+    <!-- Efek Blur Biru sebagai Background -->
+    <div class="absolute inset-0 -z-10">
+      <div
+        class="absolute top-[92px] left-0 w-[739px] h-[745px] bg-blue-500 rounded-full blur-[97.3px] opacity-50"
+      ></div>
+      <div
+        class="absolute top-[113px] right-0 w-[660px] h-[592px] bg-blue-500 rounded-full blur-[97.3px] opacity-50"
+      ></div>
+    </div>
+
+    <div class="w-full max-w-[80rem] h-full flex flex-col rounded-3xl p-1">
+      <div class="flex justify-between items-center mb-1">
+        <div class="grow flex justify-between items-center px-3">
+          <a href="/">
+            <img
+              src="{{ url_for('static', filename='images/GPTSniffer.svg') }}"
+            />
+          </a>
+          <button
+  id="showFormBtn"
+  class="bg-blue-500 text-white px-2 py-1 md:px-4 md:py-2 text-[9px] md:text-base col-end-7 rounded-3xl hover:bg-blue-600 flex items-center justify-center"
+>
+  <span class="md:hidden text-sm">+</span>
+  <!-- Tampilkan hanya di mobile -->
+  <span class="hidden md:block">+ New Scrapper</span>
+  <!-- Tampilkan hanya di desktop -->
+</button>
+        </div>
+
+        <div
+          class="w-full md:w-1/4 bg-white px-2 py-1 md:px-4 md:py-2 rounded-3xl flex justify-between items-center shadow-lg"
+        >
+          <div class="flex items-center gap-1 md:gap-2">
+            <img
+              src="{{ url_for('static', filename='images/Group.svg') }}"
+              class="aspect-square w-[1.5rem] md:w-[2rem]"
+            />
+            <span class="text-gray-700 font-semibold text-sm md:text-base">
+              {{user['username']}}
+            </span>
+          </div>
+          <a href="/logout">
+            <button
+              class="w-[1.5rem] h-[1.5rem] md:w-[2rem] md:h-[2rem] flex items-center justify-center"
+            >
+              <i
+                class="fa-solid fa-arrow-right-from-bracket text-blue-500 text-lg md:text-xl"
+              ></i>
+            </button>
+          </a>
+        </div>
+      </div>
+
+      <div class="flex gap-4 h-full relative">
+        <!-- Chat Section -->
+        <div
+          class="w-full bg-white bg-opacity-50 p-4 rounded-3xl shadow-lg h-[80vh] overflow-auto"
+        >
+          <div
+            class="flex justify-between items-center bg-blue-500 p-2 rounded-t-3xl -m-4 mb-2 sticky -top-4"
+          >
+            <h2
+              class="text-lg font-semibold p-2 ml-6 text-white flex-1 text-center"
+            >
+              {% if conversation %} Conversation '{{ conversation["title"] }}'
+              {% else %} Conversation {% endif %}
+            </h2>
+
+            <!-- Tombol Sidebar & History (Hanya Muncul di Mobile) -->
+            <div class="flex items-center gap-2 md:hidden">
+              <!-- Tombol History -->
+              <a
+                href="/history"
+                class="flex items-center justify-center w-10 h-10 text-white hover:text-blue-200 transition-colors"
+              >
+                <i class="fa-solid fa-clock-rotate-left text-xl"></i>
+              </a>
+              <!-- Tombol Buka Sidebar -->
+              <button id="toggleSidebar" class="text-white p-2">
+                <i class="fa-solid fa-bars text-xl"></i>
+              </button>
+            </div>
+          </div>
+
+          {% if home %}
+          <div
+            class="flex flex-col justify-center items-center text-center h-[60vh] gap-3"
+          >
+            <h1 class="text-5xl font-semibold">GPT SCRAPER</h1>
+            <p>Choose your chat or insert your link share ChatGPT</p>
+          </div>
+          {% else %}
+          <div
+            class="flex-1 overflow-auto p-4 md:p-6 w-full flex flex-col items-center space-y-4"
+          >
+            {% for text in conversation['text'] %}
+            <!-- User Chat -->
+            <div
+              class="flex items-start w-full max-w-[90%] md:max-w-[80%] self-end flex-row-reverse ml-auto"
+            >
+              <i
+                class="fa-solid fa-user text-gray-700 text-lg md:text-xl ml-1"
+              ></i>
+              <div
+                class="bg-white rounded-[20px] p-3 md:p-4 max-w-[80%] md:max-w-[70%]"
+              >
+                <p class="text-black text-xs md:text-sm font-medium leading-4">
+                  {{ text['user'] }}
+                </p>
+              </div>
+            </div>
+
+            <!-- Bot Chat -->
+            <div
+              class="flex items-start w-full max-w-[90%] md:max-w-[80%] self-start flex-row mr-auto"
+            >
+              <i
+                class="fa-solid fa-robot text-blue-500 text-lg md:text-xl mr-1"
+              ></i>
+              <div
+                class="bg-blue-300 rounded-[20px] p-3 md:p-4 max-w-[80%] md:max-w-[70%]"
+              >
+                <p class="text-black text-xs md:text-sm font-medium leading-4">
+                  {{ text['assistant'] }}
+                </p>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+
+          {% endif %}
+        </div>
+
+        <!-- History Sidebar (Desktop) -->
+        <div
+          class="w-1/3 bg-white bg-opacity-50 p-4 rounded-3xl shadow-lg h-[80vh] overflow-auto hidden md:block"
+        >
+          <div
+            class="flex justify-between items-center bg-blue-500 p-2 rounded-t-3xl -m-4 mb-2 sticky -top-4"
+          >
+            <h2 class="text-lg font-semibold p-2 text-white">History</h2>
+            <a
+              href="/history"
+              class="flex items-center justify-center w-10 h-10 text-white hover:text-blue-200 transition-colors"
+            >
+              <i class="fa-solid fa-clock-rotate-left text-xl"></i>
+            </a>
+          </div>
+          <div class="space-y-2 w-full w-[400px]">
+            {% for curr_conv in conversations %}
+            <button
+              class="flex items-center w-full bg-blue-300 hover:bg-blue-400 p-3 rounded-3xl shadow-md space-x-2"
+            >
+              <i
+                class="fa-regular fa-comment text-blue-500 bg-white px-2 py-0.5 rounded-full text-lg"
+              ></i>
+              <a
+                href="/conversations/{{ curr_conv['conversation_id'] }}"
+                class="w-full text-start"
+                >{{curr_conv['title']}}</a
+              >
+            </button>
+            {% endfor %}
+          </div>
+        </div>
+
+        <!-- History Sidebar (Mobile) -->
+        <div
+          id="mobileSidebar"
+          class="fixed top-0 right-0 w-3/4 h-full bg-white shadow-lg transform translate-x-full transition-transform md:hidden"
+        >
+          <div class="flex justify-between items-center bg-blue-500 p-4">
+            <h2 class="text-lg font-semibold text-white">History</h2>
+            <button id="closeSidebar" class="text-white text-xl">
+              <i class="fa-solid fa-times"></i>
+            </button>
+          </div>
+          <div class="p-4 space-y-2">
+            {% for curr_conv in conversations %}
+            <button
+              class="flex items-center w-full bg-blue-300 hover:bg-blue-400 p-3 rounded-3xl shadow-md space-x-2"
+            >
+              <i
+                class="fa-regular fa-comment text-blue-500 bg-white px-2 py-0.5 rounded-full text-lg"
+              ></i>
+              <a
+                href="/conversations/{{ curr_conv['conversation_id'] }}"
+                class="w-full text-start"
+                >{{curr_conv['title']}}</a
+              >
+            </button>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+    <form action="/insert" method="post">
+      <div
+        id="formModal"
+        class="hidden fixed inset-0 flex items-center justify-center bg-black bg-opacity-50"
+      >
+        <div
+          class="bg-white p-5 rounded-[20px] shadow-lg w-[90%] max-w-xl border border-blue-300 relative"
+        >
+          <!-- Close Button -->
+          <button
+            id="closeFormBtn"
+            class="absolute top-2 right-2 text-gray-600 hover:text-gray-900 text-2xl"
+          >
+            &times;
+          </button>
+
+          <label class="block mb-2 font-semibold" for="title"
+            >Enter Title</label
+          >
+          <input
+            type="text"
+            class="w-full p-2 mb-4 border rounded-full bg-blue-100 focus:outline-none focus:ring focus:ring-blue-400"
+            name="title"
+            id="title"
+            required
+          />
+
+          <label class="block mb-2 font-semibold" for="link">Enter Link</label>
+          <input
+            type="text"
+            class="w-full p-2 mb-4 border rounded-full bg-blue-100 focus:outline-none focus:ring focus:ring-blue-400"
+            name="link"
+            id="link"
+            required
+          />
+
+          <div class="flex justify-end">
+            <button
+              class="bg-blue-500 text-white px-4 py-2 rounded-full hover:bg-blue-600"
+              type="submit"
+            >
+              + Add
+            </button>
+          </div>
+        </div>
+      </div>
+    </form>
+  </body>
+  <script>
+    document
+      .getElementById("showFormBtn")
+      .addEventListener("click", function () {
+        document.getElementById("formModal").classList.remove("hidden"); // Tampilkan modal
+      });
+
+    document
+      .getElementById("closeFormBtn")
+      .addEventListener("click", function () {
+        document.getElementById("formModal").classList.add("hidden"); // Sembunyikan modal
+      });
+    document.querySelectorAll("p").forEach((el) => {
+      el.textContent = el.textContent.trim().replace(/\s+/g, " ");
+    });
+    document
+      .getElementById("toggleSidebar")
+      .addEventListener("click", function () {
+        document
+          .getElementById("mobileSidebar")
+          .classList.remove("translate-x-full");
+      });
+
+    document
+      .getElementById("closeSidebar")
+      .addEventListener("click", function () {
+        document
+          .getElementById("mobileSidebar")
+          .classList.add("translate-x-full");
+      });
+  </script>
+</html>
